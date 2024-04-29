@@ -1,0 +1,177 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.*;
+import java.util.ArrayList;
+
+class Student implements Serializable {
+    private String name;
+    private int rollNumber;
+    private char grade;
+
+    public Student(String name, int rollNumber, char grade) {
+        this.name = name;
+        this.rollNumber = rollNumber;
+        this.grade = grade;
+    }
+
+    // Getters and setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getRollNumber() {
+        return rollNumber;
+    }
+
+    public void setRollNumber(int rollNumber) {
+        this.rollNumber = rollNumber;
+    }
+
+    public char getGrade() {
+        return grade;
+    }
+
+    public void setGrade(char grade) {
+        this.grade = grade;
+    }
+
+    @Override
+    public String toString() {
+        return "Name: " + name + ", Roll Number: " + rollNumber + ", Grade: " + grade;
+    }
+}
+
+class StudentManagementSystem {
+    private ArrayList<Student> students = new ArrayList<>();
+
+    public void addStudent(Student student) {
+        students.add(student);
+    }
+
+    public void removeStudent(int index) {
+        students.remove(index);
+    }
+
+    public Student searchStudent(int rollNumber) {
+        for (Student student : students) {
+            if (student.getRollNumber() == rollNumber) {
+                return student;
+            }
+        }
+        return null;
+    }
+
+    public ArrayList<Student> getAllStudents() {
+        return students;
+    }
+
+    public void saveToFile(String filename) {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(filename))) {
+            oos.writeObject(students);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void loadFromFile(String filename) {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(filename))) {
+            students = (ArrayList<Student>) ois.readObject();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+public class StudentManagementSystemGUI extends JFrame implements ActionListener {
+    private StudentManagementSystem studentManagementSystem = new StudentManagementSystem();
+    private JTextArea textArea;
+    private JTextField nameField, rollNumberField, gradeField;
+
+    public StudentManagementSystemGUI() {
+        setTitle("Student Management System");
+        setSize(900, 900);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new GridLayout(4, 2));
+
+        JLabel nameLabel = new JLabel("Name:");
+        nameField = new JTextField();
+        nameField.setForeground(Color.YELLOW);
+        nameField.setBackground(Color.DARK_GRAY);
+        JLabel rollNumberLabel = new JLabel("Roll Number:");
+        rollNumberField = new JTextField();
+        rollNumberField.setForeground(Color.YELLOW);
+        rollNumberField.setBackground(Color.DARK_GRAY);
+        JLabel gradeLabel = new JLabel("Grade:");
+        gradeField = new JTextField();
+        gradeField.setForeground(Color.YELLOW);
+        gradeField.setBackground(Color.DARK_GRAY);
+
+        inputPanel.add(nameLabel);
+        inputPanel.add(nameField);
+        inputPanel.add(rollNumberLabel);
+        inputPanel.add(rollNumberField);
+        inputPanel.add(gradeLabel);
+        inputPanel.add(gradeField);
+
+        JButton addButton = new JButton("Add Student");
+        addButton.addActionListener(this);
+        inputPanel.add(addButton);
+
+        JButton displayButton = new JButton("Display Students");
+        displayButton.addActionListener(this);
+        inputPanel.add(displayButton);
+
+        add(inputPanel, BorderLayout.NORTH);
+
+        textArea = new JTextArea();
+        textArea.setBackground(Color.PINK);
+        add(new JScrollPane(textArea), BorderLayout.CENTER);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Add Student")) {
+            addStudent();
+        } else if (e.getActionCommand().equals("Display Students")) {
+            displayStudents();
+        }
+    }
+
+    private void addStudent() {
+        String name = nameField.getText();
+        int rollNumber = Integer.parseInt(rollNumberField.getText());
+        char grade = gradeField.getText().charAt(0);
+
+        Student student = new Student(name, rollNumber, grade);
+        studentManagementSystem.addStudent(student);
+
+        // Clear fields after adding student
+        nameField.setText("");
+        rollNumberField.setText("");
+        gradeField.setText("");
+
+        JOptionPane.showMessageDialog(this, "Student added successfully!");
+    }
+
+    private void displayStudents() {
+        textArea.setText(""); // Clear text area
+        ArrayList<Student> students = studentManagementSystem.getAllStudents();
+        for (Student student : students) {
+            textArea.append(student.toString() + "\n");
+        }
+    }
+
+    public static void main(String[] args) {
+        StudentManagementSystemGUI gui = new StudentManagementSystemGUI();
+        gui.setVisible(true);
+    }
+}
