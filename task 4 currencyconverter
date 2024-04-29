@@ -1,0 +1,87 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class CurrencyConverterGUI extends JFrame implements ActionListener {
+    private JComboBox<String> baseCurrencyComboBox, targetCurrencyComboBox;
+    private JTextField amountField;
+    private JLabel resultLabel;
+
+    // Fetch exchange rates from an API (not implemented in this example)
+    private double getExchangeRate(String baseCurrency, String targetCurrency) {
+        // Assume we fetch exchange rates from an API
+        // Here, we just return a random number as an example
+        return Math.random() * 10; // Random exchange rate
+    }
+
+    public CurrencyConverterGUI() {
+        setTitle("Currency Converter");
+        setSize(600, 500);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new GridLayout(4, 1));
+
+        JPanel currencyPanel = new JPanel();
+        currencyPanel.setLayout(new FlowLayout());
+
+        JLabel baseCurrencyLabel = new JLabel("Base Currency:");
+        baseCurrencyComboBox = new JComboBox<>(new String[]{"USD", "EUR", "GBP"}); // Example currencies
+        currencyPanel.add(baseCurrencyLabel);
+        currencyPanel.add(baseCurrencyComboBox);
+
+        JLabel targetCurrencyLabel = new JLabel("Target Currency:");
+        targetCurrencyComboBox = new JComboBox<>(new String[]{"USD", "EUR", "GBP"}); // Example currencies
+        currencyPanel.add(targetCurrencyLabel);
+        currencyPanel.add(targetCurrencyComboBox);
+
+        add(currencyPanel);
+
+        JPanel amountPanel = new JPanel();
+        amountPanel.setLayout(new FlowLayout());
+
+        JLabel amountLabel = new JLabel("Amount:");
+        amountField = new JTextField(10);
+        amountPanel.add(amountLabel);
+        amountPanel.add(amountField);
+
+        add(amountPanel);
+
+        JButton convertButton = new JButton("Convert");
+        convertButton.addActionListener(this);
+        add(convertButton);
+
+        resultLabel = new JLabel();
+        add(resultLabel);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getActionCommand().equals("Convert")) {
+            String baseCurrency = (String) baseCurrencyComboBox.getSelectedItem();
+            String targetCurrency = (String) targetCurrencyComboBox.getSelectedItem();
+
+            double exchangeRate = getExchangeRate(baseCurrency, targetCurrency);
+            if (exchangeRate == 0) {
+                JOptionPane.showMessageDialog(this, "Failed to fetch exchange rate. Please try again later.");
+                return;
+            }
+
+            double amount;
+            try {
+                amount = Double.parseDouble(amountField.getText());
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter a valid amount.");
+                return;
+            }
+
+            double convertedAmount = amount * exchangeRate;
+            String result = String.format("%.2f %s", convertedAmount, targetCurrency);
+            resultLabel.setText("Converted Amount: " + result);
+        }
+    }
+
+    public static void main(String[] args) {
+        CurrencyConverterGUI gui = new CurrencyConverterGUI();
+        gui.setVisible(true);
+    }
+}
