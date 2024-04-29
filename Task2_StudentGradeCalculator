@@ -1,1 +1,115 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+
+public class NumberGuessingGameGUI extends JFrame implements ActionListener {
+    private JTextField guessField;
+    private JButton guessButton, playAgainButton;
+    private JLabel resultLabel, attemptsLabel, scoreLabel;
+    private int generatedNumber;
+    private int attemptsLeft;
+    private int score;
+
+    public NumberGuessingGameGUI() {
+        setTitle("Number Guessing Game");
+        setSize(400, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new GridLayout(4, 1));
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new FlowLayout());
+
+        JLabel guessLabel = new JLabel("Enter your guess:");
+        guessField = new JTextField(10);
+        guessButton = new JButton("Guess");
+        guessButton.addActionListener(this);
+
+        inputPanel.add(guessLabel);
+        inputPanel.add(guessField);
+        inputPanel.add(guessButton);
+
+        add(inputPanel);
+
+        resultLabel = new JLabel("");
+        add(resultLabel);
+
+        attemptsLabel = new JLabel("");
+        add(attemptsLabel);
+
+        scoreLabel = new JLabel("");
+        add(scoreLabel);
+
+        generateNumber();
+        attemptsLeft = 5; // Limiting attempts to 5 initially
+        score = 0;
+    }
+
+    private void generateNumber() {
+        Random random = new Random();
+        generatedNumber = random.nextInt(100) + 1; // Generate number between 1 to 100
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == guessButton) {
+            int guess;
+            try {
+                guess = Integer.parseInt(guessField.getText());
+            } catch (NumberFormatException ex) {
+                resultLabel.setText("Please enter a valid number!");
+                return;
+            }
+
+            if (guess < 1 || guess > 100) {
+                resultLabel.setText("Please enter a number between 1 and 100!");
+                return;
+            }
+
+            attemptsLeft--;
+
+            if (guess == generatedNumber) {
+                resultLabel.setText("Congratulations! You guessed the number correctly!");
+                score++;
+                scoreLabel.setText("Score: " + score);
+                attemptsLabel.setText("");
+                playAgainButton = new JButton("Play Again");
+                playAgainButton.addActionListener(this);
+                add(playAgainButton);
+                guessButton.setEnabled(false);
+            } else if (guess < generatedNumber) {
+                resultLabel.setText("Too low! Try again.");
+            } else {
+                resultLabel.setText("Too high! Try again.");
+            }
+
+            if (attemptsLeft == 0 && guess != generatedNumber) {
+                resultLabel.setText("Sorry, you've run out of attempts. The number was: " + generatedNumber);
+                attemptsLabel.setText("");
+                guessButton.setEnabled(false);
+                playAgainButton = new JButton("Play Again");
+                playAgainButton.addActionListener(this);
+                add(playAgainButton);
+            } else {
+                attemptsLabel.setText("Attempts left: " + attemptsLeft);
+            }
+
+            guessField.setText("");
+            guessField.requestFocus();
+        } else if (e.getSource() == playAgainButton) {
+            generateNumber();
+            attemptsLeft = 5;
+            attemptsLabel.setText("Attempts left: " + attemptsLeft);
+            resultLabel.setText("");
+            remove(playAgainButton);
+            guessButton.setEnabled(true);
+        }
+    }
+
+    public static void main(String[] args) {
+        NumberGuessingGameGUI gui = new NumberGuessingGameGUI();
+        gui.setVisible(true);
+    }
+}
 
